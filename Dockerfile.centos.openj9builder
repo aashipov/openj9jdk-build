@@ -1,0 +1,164 @@
+FROM centos:7
+# See https://github.com/eclipse-openj9/openj9/blob/master/buildenv/docker/mkdocker.sh
+ARG DUMMY_USER=dummy
+ARG UID_GID=10001
+ENV JAVA_HOME="/opt/jdk"
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
+RUN yum upgrade -y && yum install -y epel-release && \
+yum -y install \
+    alsa-lib-devel \
+    automake \
+    bind-utils \
+    bison \
+    bzip2 \
+    ca-certificates \
+    cpio \
+    cups-devel \
+    curl-devel \
+    elfutils-libelf-devel \
+    expat-devel \
+    file-devel \
+    file-libs \
+    flex \
+    fontconfig \
+    fontconfig-devel \
+    freetype-devel \
+    gettext \
+    gettext-devel \
+    glibc \
+    glibc-common \
+    glibc-devel \
+    gmp-devel \
+    lbzip2 \
+    libdwarf \
+    libdwarf-devel \
+    libffi-devel \
+    libstdc++-static \
+    libX11-devel \
+    libXext-devel \
+    libXi-devel \
+    libXrandr-devel \
+    libXrender-devel \
+    libXt-devel \
+    libXtst-devel \
+    make \
+    mesa-libGL-devel \
+    mpfr-devel \
+    ntp \
+    numactl-devel \
+    openssh-clients \
+    openssh-server \
+    openssl-devel \
+    perl-CPAN \
+    perl-DBI \
+    perl-devel \
+    perl-ExtUtils-MakeMaker \
+    perl-GD \
+    perl-libwww-perl \
+    perl-Time-HiRes \
+    systemtap-devel \
+    texinfo \
+    unzip \
+    vim \
+    wget \
+    xorg-x11-server-Xvfb \
+    xz \
+    zip \
+    zlib-devel && \
+ yum clean all && \
+ cd /tmp \
+ && wget --progress=dot:mega -O autoconf.tar.gz https://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.gz \
+ && tar -xzf autoconf.tar.gz \
+ && cd autoconf-2.69 \
+ && ./configure --build=$(rpm --eval %{_host}) \
+ && make \
+ && make install \
+ && cd .. \
+ && rm -rf autoconf.tar.gz autoconf-2.69 && \
+ cd /usr/local \
+ && wget --progress=dot:mega -O gcc-7.tar.xz 'https://ci.adoptopenjdk.net/userContent/gcc/gcc750+ccache.x86_64.tar.xz' \
+ && tar -xJf gcc-7.tar.xz --strip-components=1 \
+ && ln -sf ../local/bin/gcc-7.5 /usr/bin/gcc \
+ && ln -sf ../local/bin/g++-7.5 /usr/bin/g++ \
+ && ln -sf gcc /usr/bin/cc \
+ && ln -sf g++ /usr/bin/c++ \
+ && rm -f gcc-7.tar.xz && \
+ cd /tmp \
+ && wget --progress=dot:mega -O ant.zip https://archive.apache.org/dist/ant/binaries/apache-ant-1.10.5-bin.zip \
+ && unzip -q ant.zip -d /opt \
+ && ln -s apache-ant-1.10.5 /opt/ant \
+ && ln -s /opt/ant/bin/ant /usr/bin/ant \
+ && wget --progress=dot:mega -O ant-contrib.tar.gz https://sourceforge.net/projects/ant-contrib/files/ant-contrib/1.0b3/ant-contrib-1.0b3-bin.tar.gz \
+ && tar -xzf ant-contrib.tar.gz \
+ && mv ant-contrib/ant-contrib-1.0b3.jar /opt/ant/lib \
+ && rm -rf ant-contrib ant.zip ant-contrib.tar.gz && \
+ cd /tmp \
+ && wget --progress=dot:mega -O git.tar.gz https://www.kernel.org/pub/software/scm/git/git-2.5.3.tar.gz \
+ && tar -xzf git.tar.gz --no-same-owner \
+ && cd git-2.5.3 \
+ && make prefix=/usr/local all \
+ && make prefix=/usr/local install \
+ && cd .. \
+ && rm -rf git.tar.gz git-2.5.3 && \
+ cd /tmp \
+ && wget --progress=dot:mega -O automake.tar.gz http://ftp.gnu.org/gnu/automake/automake-1.15.tar.gz \
+ && tar -xzf automake.tar.gz \
+ && cd automake-1.15 \
+ && ./configure \
+ && make \
+ && make install \
+ && cd .. \
+ && rm -rf automake.tar.gz automake-1.15 && \
+ cd /tmp \
+ && wget --progress=dot:mega -O gettext.tar.gz http://ftp.gnu.org/gnu/gettext/gettext-0.20.1.tar.gz \
+ && tar -xzf gettext.tar.gz \
+ && cd gettext-0.20.1 \
+ && ./autogen.sh --skip-gnulib \
+ && ./configure --disable-nls \
+ && make \
+ && make install \
+ && cd .. \
+ && rm -rf gettext.tar.gz gettext-0.20.1 && \
+ cd /tmp \
+ && wget --progress=dot:mega -O make.tar.gz https://github.com/mirror/make/archive/4.1.tar.gz \
+ && tar -xzf make.tar.gz \
+ && cd make-4.1 \
+ && ACLOCAL_PATH=/usr/share/aclocal autoreconf -i \
+ && ./configure \
+ && make update \
+ && make \
+ && make install \
+ && ln -s make /usr/local/bin/gmake \
+ && cd .. \
+ && rm -rf make.tar.gz make-4.1 && \
+ cd /tmp \
+ && wget --progress=dot:mega -O nasm.tar.gz https://www.nasm.us/pub/nasm/releasebuilds/2.13.03/nasm-2.13.03.tar.gz \
+ && tar -xzf nasm.tar.gz \
+ && cd nasm-2.13.03 \
+ && ./configure -prefix=/usr/local \
+ && make install \
+ && cd .. \
+ && rm -rf nasm.tar.gz nasm-2.13.03 && \
+ cd /tmp \
+ && wget --progress=dot:mega -O cmake.tar.gz https://cmake.org/files/v3.11/cmake-3.11.4.tar.gz \
+ && tar -xzf cmake.tar.gz \
+ && cd cmake-3.11.4 \
+ && export LDFLAGS='-static-libstdc++' \
+ && ./configure \
+ && make \
+ && make install \
+ && cd .. \
+ && rm -rf cmake.tar.gz cmake-3.11.4 && \
+ cd /tmp \
+ && wget --progress=dot:mega -O python.tar.xz https://www.python.org/ftp/python/3.7.3/Python-3.7.3.tar.xz \
+ && tar -xJf python.tar.xz \
+ && cd Python-3.7.3 \
+ && ./configure --prefix=/usr/local \
+ && make \
+ && make install \
+ && cd .. \
+ && rm -rf python.tar.xz Python-3.7.3 && \
+for dir in lib lib64 lib/x86_64-linux-gnu ; do echo /usr/local/$dir ; done > /etc/ld.so.conf.d/usr-local.conf \
+ && ldconfig && \
+groupadd -g ${UID_GID} ${DUMMY_USER} && useradd -m -u ${UID_GID} -d /${DUMMY_USER}/ -g ${DUMMY_USER} ${DUMMY_USER}&& \
+mkdir -p ${JAVA_HOME}/
