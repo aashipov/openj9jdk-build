@@ -26,8 +26,7 @@ IMAGE="${DOCKER_HUB_USER_AND_REPOSITORY}:${TAG}"
 docker stop ${TAG}
 docker rm ${TAG}
 docker pull ${IMAGE}
-if [[ $? -ne 0 ]]
-then 
+if [[ $? -ne 0 ]]; then
     docker build --file=Dockerfile.${DISTRO}.${OPENJ9_BUILDER} --tag ${IMAGE} .
     docker push ${IMAGE}
 fi
@@ -49,8 +48,7 @@ IMAGE="${DOCKER_HUB_USER_AND_REPOSITORY}:${TAG}"
 docker stop ${TAG}
 docker rm ${TAG}
 docker pull ${IMAGE}
-if [[ $? -ne 0 ]]
-then 
+if [[ $? -ne 0 ]]; then
     docker build --file=Dockerfile.${DISTRO}.${JAVA_VERSION} --tag ${IMAGE} .
     docker push ${IMAGE}
 fi

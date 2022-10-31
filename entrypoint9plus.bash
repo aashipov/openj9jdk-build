@@ -26,7 +26,7 @@ fi
 JDK_DIR="${TOP_DIR}/${JDK_FLAVOR}"
 OS_TYPE_AND_INSTRUCTION_SET="${OS_TYPE}-${INSTRUCTION_SET}"
 
-BRANCH_TO_BUILD="v0.33.1-release"
+BRANCH_TO_BUILD="v0.35.0-release"
 #BRANCH_TO_BUILD="main"
 
 git config --global user.email "anatoly.a.shipov@gmail.com"
@@ -47,26 +47,15 @@ fi
 
 rm -rf ${JDK_DIR}/omr/ ${JDK_DIR}/openj9/
 
-export CFLAGS=${_CFLAGS}
-export CXXFLAGS=${_CFLAGS}
-
 bash get_source.sh -openj9-branch=${BRANCH_TO_BUILD} -omr-branch=${BRANCH_TO_BUILD}
 
 VERSION_STRING=$(awk -F" := " '{print $2}' ${JDK_DIR}/closed/openjdk-tag.gmk)
 
-bash configure \
-    --with-debug-level=release \
-    --with-native-debug-symbols=none \
-    --with-jvm-variants=server \
-    --with-extra-cflags="${_CFLAGS}" \
-    --with-extra-cxxflags="${_CFLAGS}" \
-    --enable-unlimited-crypto \
-    --disable-warnings-as-errors \
-    --disable-warnings-as-errors-omr \
-    --disable-warnings-as-errors-openj9 \
-    --disable-keep-packaged-modules \
-    --with-version-string="${VERSION_STRING#${JDK}-}"
-#   --with-toolchain-type=clang \
+CONFIGURE_DETAILS="--verbose --with-debug-level=release --with-native-debug-symbols=none --with-jvm-variants=server --with-freetype=bundled --with-version-pre=\"\" --with-version-opt=\"\" --with-extra-cflags=\"${_CFLAGS}\" --with-extra-cxxflags=\"${_CFLAGS}\" --with-extra-ldflags=\"${_CFLAGS}\" --enable-unlimited-crypto --disable-warnings-as-errors --disable-warnings-as-errors-omr --disable-warnings-as-errors-openj9 --disable-keep-packaged-modules --with-version-string=\"${VERSION_STRING#${JDK}-}\""
+#CONFIGURE_DETAILS="${CONFIGURE_DETAILS} --with-toolchain-type=clang"
+#CONFIGURE_DETAILS="${CONFIGURE_DETAILS} --with-jtreg=${JTREG_DIR}/build/images/jtreg"
+#CONFIGURE_DETAILS="${CONFIGURE_DETAILS} --with-gtest=${GTEST_DIR}"
+bash -c "bash configure ${CONFIGURE_DETAILS}"
 
 make clean
 STARTTIME=$(date +%s)
